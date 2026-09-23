@@ -5,4 +5,6 @@ export const books = sqliteTable("books", {
   title: text("title").notNull(),
   author: text("author").notNull(),
   year: integer("year"),
+  description: text("description"),
+  image: text("image"),
 });
