@@ -5,6 +5,13 @@ import type { Route } from "./+types/home";
 import { getDb } from "../db.server";
 import { books } from "../../drizzle/schema";
 
+function capitalizeFirstLetter(e: React.FocusEvent<HTMLInputElement>) {
+  const el = e.target;
+  if (el.value.length > 0) {
+    el.value = el.value.charAt(0).toUpperCase() + el.value.slice(1);
+  }
+}
+
 export async function loader() {
   const db = getDb(env.bookpoint_db);
   const allBooks = await db.select().from(books).all();
@@ -18,6 +25,7 @@ export async function action({ request }: Route.ActionArgs) {
   const yearRaw = formData.get("year") as string;
   const description = formData.get("description") as string;
   const image = formData.get("image") as string;
+  const category = formData.get("category") as string;
 
   const db = getDb(env.bookpoint_db);
   await db.insert(books).values({
@@ -26,16 +34,12 @@ export async function action({ request }: Route.ActionArgs) {
     year: yearRaw ? Number(yearRaw) : null,
     description: description || null,
     image: image || null,
+    category: category || null,
   });
 
   return { ok: true };
 }
-function capitalizeFirstLetter(e: React.FocusEvent<HTMLInputElement>) {
-  const el = e.target;
-  if (el.value.length > 0) {
-    el.value = el.value.charAt(0).toUpperCase() + el.value.slice(1);
-  }
-}
+
 export default function Home({ loaderData }: Route.ComponentProps) {
   const submit = useSubmit();
   const fetcher = useFetcher();
@@ -69,13 +73,21 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     <div className="p-8 bg-ink min-h-screen">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-serif text-4xl text-gold">BOOKPOINT</h1>
-        <button
-          type="button"
-          onClick={() => setIsAddOpen(true)}
-          className="px-5 py-2 rounded bg-gold text-ink font-semibold hover:bg-gold-soft"
-        >
-          Ongeza Kitabu
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/dashboard"
+            className="px-5 py-2 rounded border border-gold text-gold font-semibold hover:bg-gold hover:text-ink"
+          >
+            Dashboard
+          </Link>
+          <button
+            type="button"
+            onClick={() => setIsAddOpen(true)}
+            className="px-5 py-2 rounded bg-gold text-ink font-semibold hover:bg-gold-soft"
+          >
+            Ongeza Kitabu
+          </button>
+        </div>
       </div>
 
       <ul className="space-y-3">
@@ -85,7 +97,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             className="bg-card rounded-lg px-4 py-3 flex items-center justify-between"
           >
             <div>
-           <span className="font-serif italic text-lg text-gold-soft">{book.title}</span>
+              <span className="font-serif italic text-lg text-gold-soft">{book.title}</span>
               <span className="text-gold-soft/70">
                 {" "}
                 — {book.author} {book.year ? `(${book.year})` : ""}
@@ -168,25 +180,37 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <fetcher.Form method="post" className="space-y-3">
               <div>
                 <label className="block text-gold-soft mb-1 text-sm">Jina la kitabu</label>
-               <input
-  name="title"
-  required
-  onBlur={capitalizeFirstLetter}
-  className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
-/>
+                <input
+                  name="title"
+                  required
+                  onBlur={capitalizeFirstLetter}
+                  className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
+                />
               </div>
               <div>
                 <label className="block text-gold-soft mb-1 text-sm">Mwandishi</label>
-               <input
-  name="author"
-  required
-  onBlur={capitalizeFirstLetter}
-  className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
-/>
+                <input
+                  name="author"
+                  required
+                  onBlur={capitalizeFirstLetter}
+                  className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
+                />
               </div>
               <div>
                 <label className="block text-gold-soft mb-1 text-sm">Mwaka</label>
                 <input name="year" type="number" className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold" />
+              </div>
+              <div>
+                <label className="block text-gold-soft mb-1 text-sm">Aina (Category)</label>
+                <select
+                  name="category"
+                  required
+                  className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
+                >
+                  <option value="romance">Romance</option>
+                  <option value="love">Love Stories</option>
+                  <option value="other">Other Stories</option>
+                </select>
               </div>
               <div>
                 <label className="block text-gold-soft mb-1 text-sm">URL ya picha</label>
@@ -229,6 +253,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   name="title"
                   required
                   defaultValue={editingBook.title}
+                  onBlur={capitalizeFirstLetter}
                   className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
                 />
               </div>
@@ -238,6 +263,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   name="author"
                   required
                   defaultValue={editingBook.author}
+                  onBlur={capitalizeFirstLetter}
                   className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
                 />
               </div>
@@ -249,6 +275,19 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   defaultValue={editingBook.year ?? ""}
                   className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
                 />
+              </div>
+              <div>
+                <label className="block text-gold-soft mb-1 text-sm">Aina (Category)</label>
+                <select
+                  name="category"
+                  required
+                  defaultValue={editingBook.category ?? "other"}
+                  className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold"
+                >
+                  <option value="romance">Romance</option>
+                  <option value="love">Love Stories</option>
+                  <option value="other">Other Stories</option>
+                </select>
               </div>
               <div>
                 <label className="block text-gold-soft mb-1 text-sm">URL ya picha</label>

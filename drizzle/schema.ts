@@ -1,10 +1,16 @@
 import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
-export const books = sqliteTable("books", {
+export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  title: text("title").notNull(),
-  author: text("author").notNull(),
-  year: integer("year"),
-  description: text("description"),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
   image: text("image"),
+});
+
+export const memes = sqliteTable("memes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  caption: text("caption").notNull(),
+  image: text("image").notNull(),
+  soundUrl: text("sound_url"),
+  category: text("category"),
 });
