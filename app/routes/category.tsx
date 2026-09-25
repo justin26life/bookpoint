@@ -37,11 +37,13 @@ export async function action({ request, params }: Route.ActionArgs) {
   if (intent === "addMeme") {
     const caption = formData.get("caption") as string;
     const image = formData.get("image") as string;
+    const mediaType = formData.get("mediaType") as string;
     const soundUrl = formData.get("soundUrl") as string;
 
     await db.insert(memes).values({
       caption,
       image,
+      mediaType: mediaType || "image",
       soundUrl: soundUrl || null,
       category: params.slug,
     });
@@ -53,6 +55,7 @@ export async function action({ request, params }: Route.ActionArgs) {
     const id = Number(formData.get("id"));
     const caption = formData.get("caption") as string;
     const image = formData.get("image") as string;
+    const mediaType = formData.get("mediaType") as string;
     const soundUrl = formData.get("soundUrl") as string;
     const category = formData.get("category") as string;
 
@@ -61,6 +64,7 @@ export async function action({ request, params }: Route.ActionArgs) {
       .set({
         caption,
         image,
+        mediaType: mediaType || "image",
         soundUrl: soundUrl || null,
         category,
       })
@@ -151,7 +155,16 @@ export default function CategoryPage({ loaderData }: Route.ComponentProps) {
           {filteredMemes.map((meme) => (
             <div key={meme.id} className="bg-card rounded-lg overflow-hidden border border-gold/10">
               <Link to={`/memes/${meme.id}`}>
-                <img src={meme.image} alt={meme.caption} className="w-full h-52 object-cover" />
+                {meme.mediaType === "video" ? (
+                  <video
+                    src={meme.image}
+                    className="w-full h-52 object-cover"
+                    muted
+                    playsInline
+                  />
+                ) : (
+                  <img src={meme.image} alt={meme.caption} className="w-full h-52 object-cover" />
+                )}
               </Link>
               <div className="p-4">
                 <Link to={`/memes/${meme.id}`}>
@@ -215,7 +228,14 @@ export default function CategoryPage({ loaderData }: Route.ComponentProps) {
             <addFetcher.Form method="post" className="space-y-3">
               <input type="hidden" name="intent" value="addMeme" />
               <div>
-                <label className="block text-gold-soft mb-1 text-sm">URL ya picha</label>
+                <label className="block text-gold-soft mb-1 text-sm">Aina</label>
+                <select name="mediaType" required defaultValue="image" className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold">
+                  <option value="image">Picha</option>
+                  <option value="video">Video</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gold-soft mb-1 text-sm">URL ya picha/video</label>
                 <input name="image" type="url" required placeholder="https://..." className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold" />
               </div>
               <div>
@@ -223,7 +243,7 @@ export default function CategoryPage({ loaderData }: Route.ComponentProps) {
                 <textarea name="caption" required rows={2} className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold" />
               </div>
               <div>
-                <label className="block text-gold-soft mb-1 text-sm">URL ya sauti (hiari)</label>
+                <label className="block text-gold-soft mb-1 text-sm">URL ya sauti (hiari, kwa picha)</label>
                 <input name="soundUrl" type="url" placeholder="https://..." className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold" />
               </div>
               <div className="flex justify-end gap-3 pt-2">
@@ -251,7 +271,14 @@ export default function CategoryPage({ loaderData }: Route.ComponentProps) {
               <input type="hidden" name="intent" value="updateMeme" />
               <input type="hidden" name="id" value={editingMeme.id} />
               <div>
-                <label className="block text-gold-soft mb-1 text-sm">URL ya picha</label>
+                <label className="block text-gold-soft mb-1 text-sm">Aina</label>
+                <select name="mediaType" required defaultValue={editingMeme.mediaType ?? "image"} className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold">
+                  <option value="image">Picha</option>
+                  <option value="video">Video</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gold-soft mb-1 text-sm">URL ya picha/video</label>
                 <input name="image" type="url" required defaultValue={editingMeme.image} className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold" />
               </div>
               <div>
@@ -267,7 +294,7 @@ export default function CategoryPage({ loaderData }: Route.ComponentProps) {
                 </select>
               </div>
               <div>
-                <label className="block text-gold-soft mb-1 text-sm">URL ya sauti (hiari)</label>
+                <label className="block text-gold-soft mb-1 text-sm">URL ya sauti (hiari, kwa picha)</label>
                 <input name="soundUrl" type="url" defaultValue={editingMeme.soundUrl ?? ""} className="w-full bg-ink text-gold-soft rounded px-3 py-2 outline-none focus:ring-2 focus:ring-gold" />
               </div>
               <div className="flex justify-end gap-3 pt-2">

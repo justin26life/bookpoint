@@ -11,6 +11,7 @@ export const memes = sqliteTable("memes", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   caption: text("caption").notNull(),
   image: text("image").notNull(),
+  mediaType: text("media_type").notNull().default("image"),
   soundUrl: text("sound_url"),
   category: text("category"),
 });

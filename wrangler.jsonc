@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "bookpoint",
+  "name": "memepoint",
   "compatibility_date": "2026-09-16",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./workers/app.ts",
@@ -14,12 +14,12 @@
     "enabled": true
   },
   "upload_source_maps": true,
-  "d1_databases": [
+ "d1_databases": [
     {
       "binding": "bookpoint_db",
       "database_name": "bookpoint-db",
       "database_id": "20010661-44b5-4396-b5bc-f82c2e3615ea",
       "migrations_dir": "./drizzle/migrations"
     }
-  ]
+]
 }
